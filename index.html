@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Music Hub 2026</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: linear-gradient(180deg, #0a0015 0%, #1a0033 100%);
+  color: #fff;
+  font-family: Arial, sans-serif;
+  padding: 20px 16px;
+  min-height: 100vh;
+}
+#botScreen { max-width: 500px; margin: 0 auto; }
+.bot-icon {
+  width: 90px; height: 90px; border-radius: 50%;
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 50px; margin: 0 auto 18px;
+  box-shadow: 0 0 30px rgba(168, 85, 247, 0.6);
+}
+.bot-msg {
+  font-size: 18px; color: #fff; text-align: center;
+  margin-bottom: 24px; line-height: 1.6;
+  background: rgba(20, 10, 40, 0.6);
+  border: 2px solid #a855f7;
+  border-radius: 16px;
+  padding: 20px;
+}
+.bot-btn {
+  display: block; width: 100%;
+  padding: 18px;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #1a0a30, #2d1a45);
+  border: 2px solid #a855f7;
+  border-radius: 16px;
+  color: #fff;
+  font-size: 17px;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: Arial;
+}
+.bot-btn:hover { border-color: #ec4899; background: linear-gradient(135deg, #2d1a45, #3d2a55); }
+.bot-btn:active { opacity: 0.7; }
+
+#musicScreen { display: none; max-width: 600px; margin: 0 auto; }
+.back-home {
+  background: #333;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-bottom: 18px;
+  font-family: Arial;
+}
+.screen-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: #ff9500;
+  margin-bottom: 20px;
+}
+.song {
+  display: block;
+  padding: 16px;
+  background: rgba(30, 20, 50, 0.7);
+  border: 1px solid #a855f7;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  text-decoration: none;
+  color: #fff;
+}
+.song:hover { background: rgba(50, 30, 80, 0.9); border-color: #ec4899; }
+.song .t { font-size: 15px; font-weight: bold; margin-bottom: 5px; }
+.song .a { font-size: 13px; color: #a855f7; }
+.song .src {
+  display: inline-block; font-size: 9px;
+  padding: 2px 8px; border-radius: 4px;
+  margin-left: 8px; font-weight: bold;
+  vertical-align: middle;
+}
+.song .src.yt { background: rgba(255, 0, 0, 0.2); border: 1px solid #ff0000; color: #ff6b6b; }
+.song .src.tk { background: rgba(0, 242, 234, 0.2); border: 1px solid #00f2ea; color: #00f2ea; }
+</style>
+</head>
+<body>
+
+<div id="botScreen">
+  <div class="bot-icon">🤖</div>
+  <div class="bot-msg" id="botMsg">Chào bạn!<br>Hôm nay tâm trạng bạn thế nào?</div>
+  <button class="bot-btn" id="btnSad">😔 Buồn</button>
+  <button class="bot-btn" id="btnHappy">😄 Vui vẻ</button>
+  <button class="bot-btn" id="btnChill">😌 Chill / thư giãn</button>
+  <button class="bot-btn" id="btnAll">🎵 Xem tất cả nhạc</button>
+</div>
+
+<div id="musicScreen">
+  <button class="back-home" id="btnBack">← Quay lại</button>
+  <div class="screen-title" id="musicTitle">Danh sách nhạc</div>
+  <div id="songList"></div>
+</div>
+
+<script>
+var SONGS_SAD = [
+  { title: 'Mật Ngọt',                    artist: 'Dunghoangpham',                platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Mật+Ngọt+Dunghoangpham' },
+  { title: 'đưa em về nhàa',              artist: 'GREY D & Chillies',            platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=đưa+em+về+nhàa' },
+  { title: 'Buông Hàng',                  artist: 'My Girl CT & Young Milo',      platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Buông+Hàng' },
+  { title: 'Hãy Là Của Riêng Anh',        artist: 'Triệu Minh Đạt',               platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Hãy+Là+Của+Riêng+Anh' },
+  { title: 'Cơn Bão Tình Yêu',            artist: 'Yuni Boo, H2K',                platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Cơn+Bão+Tình+Yêu' },
+  { title: 'Trách Duyên Trách Phận',      artist: 'NH4T Remix & Đỗ Thành Duy',    platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Trách+Duyên+Trách+Phận' },
+  { title: 'Ba Kiếp Tình Một Kiếp Duyên', artist: '20X Remix & Lâm Tuấn',         platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Ba+Kiếp+Tình+Một+Kiếp+Duyên' },
+  { title: 'Chắc Em Đã Quên Rồi',         artist: 'Quang Chợ Lầm',                platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Chắc+Em+Đã+Quên+Rồi' },
+  { title: 'Bên Ấy Em Có Ai Rồi',         artist: 'Châu Khải Phong',              platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Bên+Ấy+Em+Có+Ai+Rồi' },
+  { title: 'Lời Hứa Năm 18',              artist: 'Jaysonlei',                    platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Lời+Hứa+Năm+18' },
+  { title: 'Mình Là Người Yêu Cũ',        artist: 'Khả Hiệp x Orinn',             platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Mình+Là+Người+Yêu+Cũ' },
+  { title: 'Sự Ưu Tiên Của Em',           artist: 'Lê Gia Bảo x Orinn',           platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Sự+Ưu+Tiên+Của+Em' },
+  { title: 'Sau Này Em Cưới Ai Rồi',      artist: 'Kiều Chi',                     platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Sau+Này+Em+Cưới+Ai+Rồi' },
+  { title: 'Em Thua Cô Ta',               artist: 'Min Quỳnh Anh x Orinn',        platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Em+Thua+Cô+Ta' },
+  { title: 'Đừng Hỏi Em Ổn Không',        artist: 'Diệu Vân x H2K',               platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Đừng+Hỏi+Em+Ổn+Không' },
+  { title: 'Mưa Đợi Chờ',                 artist: 'Gia Hân',                      platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Mưa+Đợi+Chờ' },
+  { title: 'Chấp Niệm Trong Em',          artist: 'Ngân Ngân',                    platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Chấp+Niệm+Trong+Em' },
+  { title: 'Điều Em Lo Sợ',               artist: 'Nguyễn Văn Chung',             platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Điều+Em+Lo+Sợ' },
+  { title: 'Yêu Bằng Mắt',                artist: 'Đình Dũng',                    platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Yêu+Bằng+Mắt' },
+  { title: 'Đi Khắp Thiên Hà',            artist: 'YASTA',                        platform: 'youtube', url: 'https://www.youtube.com/results?search_query=Đi+Khắp+Thiên+Hà+YASTA' },
+  { title: 'Ghen Chỉ Vì Yêu',             artist: 'Lâm Chấn Huy',                 platform: 'youtube', url: 'https://www.youtube.com/results?search_query=Ghen+Chỉ+Vì+Yêu' },
+  { title: 'Không Ai Yêu Em Giống Tôi',   artist: 'Lâm Chấn Huy',                 platform: 'youtube', url: 'https://www.youtube.com/results?search_query=Không+Ai+Yêu+Em+Giống+Tôi' },
+  { title: 'Nụ Hôn Và Nước Mắt',          artist: 'Lâm Chấn Huy',                 platform: 'youtube', url: 'https://www.youtube.com/results?search_query=Nụ+Hôn+Và+Nước+Mắt' },
+  { title: 'Hạnh Phúc Đau Lòng',          artist: 'Remix TikTok',                 platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Hạnh+Phúc+Đau+Lòng' },
+  { title: 'Hôm Qua Tôi Đã Khóc',         artist: 'Remix TikTok',                 platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Hôm+Qua+Tôi+Đã+Khóc' },
+  { title: 'Hai Người Hai Hướng',         artist: 'Remix TikTok',                 platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Hai+Người+Hai+Hướng' },
+  { title: 'Yêu Thật Khó Xóa Thật Đau',   artist: 'Remix TikTok',                 platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Yêu+Thật+Khó' },
+  { title: 'Anh Đã Lừa Dối Em Rồi',       artist: 'Quang Kiệt',                   platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Anh+Đã+Lừa+Dối+Em+Rồi' },
+  { title: 'Trái Tim Của Gió',            artist: 'Mark Remix',                   platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Trái+Tim+Của+Gío' },
+  { title: 'Người Đến Sau',               artist: 'Hoài An',                      platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Người+Đến+Sau' }
+];
+
+var SONGS_HAPPY = [
+  { title: 'Gió Speed up',                artist: 'Toxic Dope & JanK',            platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Gió+Speed+up' },
+  { title: 'Sắc Ngọc Ngà',                artist: 'Hữu Trí',                      platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Sắc+Ngọc+Ngà' },
+  { title: 'Alejandro',                   artist: 'LUCKY3RD',                     platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Alejandro+LUCKY3RD' },
+  { title: 'Cậu Cả',                      artist: 'XAVI Phạm',                    platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Cậu+Cả+XAVI' },
+  { title: 'Đơn Giản Anh Yêu Em',         artist: 'Dunghoangpham, ACV',           platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Đơn+Giản+Anh+Yêu+Em' },
+  { title: 'Chào Mừng Đến Bình Nguyên',   artist: 'VuHuynh',                      platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Chào+Mừng+Đến+Bình+Nguyên' },
+  { title: 'Vận Mệnh Trong Tay',          artist: 'Khánh Phương',                 platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Vận+Mệnh+Trong+Tay' },
+  { title: 'Shay Nắnggg',                 artist: 'Amee & Obito',                 platform: 'youtube', url: 'https://www.youtube.com/results?search_query=Shay+Nắnggg+Amee' },
+  { title: 'Nên Duyên Nên Phận',          artist: 'Duyên Kendy',                  platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Nên+Duyên+Nên+Phận' },
+  { title: 'Anh Em MaCau',                artist: 'Sakhar & XAVI',                platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Anh+Em+MaCau' },
+  { title: 'TUNA TUNA',                   artist: 'MiiNa & Tun Phạm',             platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=TUNA+TUNA' },
+  { title: 'Một Ngày Chẳng Nắng',         artist: 'Pháo',                         platform: 'youtube', url: 'https://www.youtube.com/results?search_query=Một+Ngày+Chẳng+Nắng+Pháo' },
+  { title: 'Bạn Ơi',                      artist: 'Myra Trần',                    platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Bạn+Ơi+Myra+Trần' },
+  { title: 'Thanh Tân',                   artist: 'Vương Bình',                   platform: 'youtube', url: 'https://www.youtube.com/results?search_query=Thanh+Tân+Vương+Bình' },
+  { title: 'Gói Con Tim Làm Quà',         artist: 'Nguyễn Hùng',                  platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Gói+Con+Tim+Làm+Quà' },
+  { title: 'Thắng Đời Thua Em',           artist: 'Thái Học x Orinn',             platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Thắng+Đời+Thua+Em' },
+  { title: 'Xin Đừng Rời Xa Anh',         artist: 'Lê Gia Bảo',                   platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Xin+Đừng+Rời+Xa+Anh' },
+  { title: '10 Mất 1 Còn Không',          artist: 'Lê Gia Bảo',                   platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=10+Mất+1+Còn+Không' },
+  { title: 'Váy Cưới',                    artist: 'Erik',                         platform: 'youtube', url: 'https://www.youtube.com/results?search_query=Váy+Cưới+Erik' },
+  { title: 'Love Options',                artist: 'BESTie',                       platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Love+Options+BESTie' },
+  { title: 'Gái Tây Gốc Việt',            artist: 'Nicole Nguyễn',                platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Gái+Tây+Gốc+Việt' },
+  { title: 'Ta Yêu Nhau Từ Buôn Mê Thuột', artist: 'DJ Tùng Xèng',                platform: 'youtube', url: 'https://www.youtube.com/results?search_query=Ta+Yêu+Nhau+Từ+Buôn+Mê+Thuột' },
+  { title: 'Cặp Đôi Vàng 2025',           artist: 'Tùng Xèng ft Aries',           platform: 'youtube', url: 'https://www.youtube.com/results?search_query=Cặp+Đôi+Vàng+2025' },
+  { title: 'Bông Hoa Đẹp Nhất',           artist: 'Quân AP x Orinn',              platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Bông+Hoa+Đẹp+Nhất' },
+  { title: 'Giá Như Anh Là Em',           artist: 'Remix TikTok',                 platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Giá+Như+Anh+Là+Em' }
+];
+
+var SONGS_CHILL = [
+  { title: 'Chill Cùng Anh',              artist: 'Various',                      platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Chill+Cùng+Anh' },
+  { title: 'Lofi Việt Chill',             artist: 'Various',                      platform: 'youtube', url: 'https://www.youtube.com/results?search_query=Lofi+Việt+Chill' },
+  { title: 'Chill Piano',                 artist: 'Various',                      platform: 'youtube', url: 'https://www.youtube.com/results?search_query=Chill+Piano+Việt' },
+  { title: 'Mưa Tuyết',                   artist: 'Mee Media & Jimmy Nguyễn',     platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Mưa+Tuyết+DN+Team+Remix' },
+  { title: 'Nonstop Việt Mix 2026',       artist: 'Tùng Xèng',                    platform: 'youtube', url: 'https://www.youtube.com/results?search_query=Nonstop+Việt+Mix+2026' },
+  { title: 'Nonstop Cảm Ơn 2025',         artist: 'Tùng Xèng ft Min Xèng',        platform: 'youtube', url: 'https://www.youtube.com/results?search_query=Nonstop+Cảm+Ơn+2025' },
+  { title: 'Nonstop Vietmix Hot TikTok',  artist: 'Tùng Xèng',                    platform: 'youtube', url: 'https://www.youtube.com/results?search_query=Nonstop+Vietmix+Hot+TikTok' },
+  { title: 'Đi Khắp Thiên Hà',            artist: 'YASTA',                        platform: 'youtube', url: 'https://www.youtube.com/results?search_query=Đi+Khắp+Thiên+Hà+YASTA' },
+  { title: 'Sao Mình Chưa Nắm Tay Nhau',  artist: 'Yan Nguyễn',                   platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Sao+Mình+Chưa+Nắm+Tay+Nhau' },
+  { title: 'Mùa Thu Và Lời Xin Lỗi',      artist: 'Thành Đạt',                    platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Mùa+Thu+Và+Lời+Xin+Lỗi' },
+  { title: 'Đến Khi Nào',                 artist: 'Yan Nguyễn',                   platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Đến+Khi+Nào+Drill+House' },
+  { title: 'Ôm Sầu',                      artist: 'Remix TikTok',                 platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Ôm+Sầu+Remix' },
+  { title: 'Vở Kịch Của Em',              artist: 'Remix TikTok',                 platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Vở+Kịch+Của+Em' },
+  { title: 'Lỡ Một Lời Thương',           artist: 'Remix TikTok',                 platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Lỡ+Một+Lời+Thương' },
+  { title: 'Vạn Vật Thay Đổi',            artist: 'Nguyễn Đình Vũ',               platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Vạn+Vật+Thay+Đổi' },
+  { title: 'Em Muốn Tự Do',               artist: 'Remix TikTok',                 platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Em+Muốn+Tự+Do+Remix' },
+  { title: 'Chữ Vấn Chữ Vương',           artist: 'Remix TikTok',                 platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Chữ+Vấn+Chữ+Vương' },
+  { title: 'Vết Thương',                  artist: 'Remix TikTok',                 platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Vết+Thương+Remix' },
+  { title: 'Anh Đâu Là Gì',               artist: 'Jk Cover x Orinn',             platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Anh+Đâu+Là+Gì' },
+  { title: 'Họa Phận Ái Lưu',             artist: 'Remix TikTok',                 platform: 'tiktok',  url: 'https://www.tiktok.com/search?q=Họa+Phận+Ái+Lưu' }
+];
+
+function escapeHtml(text) {
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function showMusic(mood) {
+  var songs = [];
+  var title = '';
+
+  if (mood === 'sad') {
+    songs = SONGS_SAD;
+    title = '😔 NHẠC BUỒN';
+  } else if (mood === 'happy') {
+    songs = SONGS_HAPPY;
+    title = '😄 NHẠC VUI';
+  } else if (mood === 'chill') {
+    songs = SONGS_CHILL;
+    title = '😌 NHẠC CHILL';
+  } else {
+    songs = SONGS_SAD.concat(SONGS_HAPPY).concat(SONGS_CHILL);
+    title = '🎵 TẤT CẢ NHẠC';
+  }
+
+  document.getElementById('musicTitle').textContent = title;
+
+  var html = '';
+  for (var i = 0; i < songs.length; i++) {
+    var s = songs[i];
+    var srcClass = s.platform === 'youtube' ? 'src yt' : 'src tk';
+    var srcText = s.platform === 'youtube' ? 'YOUTUBE' : 'TIKTOK';
+
+    html += '<a class="song" href="' + s.url + '" target="_blank" rel="noopener">' +
+      '<div class="t">' + escapeHtml(s.title) + '<span class="' + srcClass + '">' + srcText + '</span></div>' +
+      '<div class="a">' + escapeHtml(s.artist) + '</div>' +
+      '</a>';
+  }
+
+  document.getElementById('songList').innerHTML = html;
+  document.getElementById('botScreen').style.display = 'none';
+  document.getElementById('musicScreen').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+
+function goHome() {
+  document.getElementById('botScreen').style.display = 'block';
+  document.getElementById('musicScreen').style.display = 'none';
+  window.scrollTo(0, 0);
+}
+
+function setBotMessage(text) {
+  document.getElementById('botMsg').innerHTML = text;
+}
+
+function showMoodButtons() {
+  var screen = document.getElementById('botScreen');
+  screen.innerHTML =
+    '<div class="bot-icon">🤖</div>' +
+    '<div class="bot-msg" id="botMsg"></div>' +
+    '<button class="bot-btn" id="btnSad">😔 Buồn</button>' +
+    '<button class="bot-btn" id="btnHappy">😄 Vui vẻ</button>' +
+    '<button class="bot-btn" id="btnChill">😌 Chill / thư giãn</button>' +
+    '<button class="bot-btn" id="btnAll">🎵 Xem tất cả nhạc</button>';
+
+  document.getElementById('btnSad').addEventListener('click', function() {
+    setBotMessage('😔 Thôi không sao đâu, cố lên nhé!<br><br>Mình gợi ý vài bài nhạc buồn cho bạn nghe nè:');
+    showAfterMood('sad', '🎵 Nghe nhạc buồn');
+  });
+
+  document.getElementById('btnHappy').addEventListener('click', function() {
+    setBotMessage('😄 Hôm nay có chuyện gì vui hả? Chia sẻ mình với!<br><br>Mình gợi ý vài bài nhạc vui cho bạn nè:');
+    showAfterMood('happy', '🎵 Nghe nhạc vui');
+  });
+
+  document.getElementById('btnChill').addEventListener('click', function() {
+    setBotMessage('😌 Chill thư giãn nha!<br><br>Mình gợi ý vài bài cho bạn thư giãn nè:');
+    showAfterMood('chill', '🎵 Nghe nhạc chill');
+  });
+
+  document.getElementById('btnAll').addEventListener('click', function() {
+    showMusic('all');
+  });
+}
+
+function showAfterMood(mood, btnText) {
+  var screen = document.getElementById('botScreen');
+  var oldMsg = document.getElementById('botMsg').innerHTML;
+  screen.innerHTML =
+    '<div class="bot-icon">🤖</div>' +
+    '<div class="bot-msg">' + oldMsg + '</div>' +
+    '<button class="bot-btn" id="btnGo">' + btnText + '</button>' +
+    '<button class="bot-btn" id="btnReset">↻ Chọn lại tâm trạng</button>';
+
+  document.getElementById('btnGo').addEventListener('click', function() {
+    showMusic(mood);
+  });
+
+  document.getElementById('btnReset').addEventListener('click', function() {
+    location.reload();
+  });
+}
+
+/* ===== KHỞI TẠO ===== */
+document.getElementById('btnSad').addEventListener('click', function() {
+  setBotMessage('😔 Thôi không sao đâu, cố lên nhé!<br><br>Mình gợi ý vài bài nhạc buồn cho bạn nghe nè:');
+  showAfterMood('sad', '🎵 Nghe nhạc buồn');
+});
+
+document.getElementById('btnHappy').addEventListener('click', function() {
+  setBotMessage('😄 Hôm nay có chuyện gì vui hả? Chia sẻ mình với!<br><br>Mình gợi ý vài bài nhạc vui cho bạn nè:');
+  showAfterMood('happy', '🎵 Nghe nhạc vui');
+});
+
+document.getElementById('btnChill').addEventListener('click', function() {
+  setBotMessage('😌 Chill thư giãn nha!<br><br>Mình gợi ý vài bài cho bạn thư giãn nè:');
+  showAfterMood('chill', '🎵 Nghe nhạc chill');
+});
+
+document.getElementById('btnAll').addEventListener('click', function() {
+  showMusic('all');
+});
+
+document.getElementById('btnBack').
